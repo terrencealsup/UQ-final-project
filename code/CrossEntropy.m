@@ -1,72 +1,98 @@
-function [prob, mu, S] = CrossEntropy(Xi, rho, N, t, p, F)
+function [prob, mu, S] = CrossEntropy(Z, t, p, f, N, rho, dt)
 % CrossEntropy
+%
+% Use the Cross Entropy method to estimate the rare-event probability
+% P_p[f(Z) > t].  Finds the optimal Gaussian biasing density.
+%
+% Authors: Terrence Alsup and Frederick Law
 %--------------------------------------------------------------------------
 % Input:
-% 1. Xi  -- a vector of size N of samples from p.
-% 2. rho -- the quantile to use.
-% 3. N   -- the number of samples to draw at each iteration.
-% 4. t   -- the rare-event threshold.
-% 5. p   -- the target density.
-% 6. F   -- the forward model.
+% 1. Z   -- N-by-d matrix of samples from p.  d is the dimension.
+% 2. t   -- the rare-event threshold.
+% 3. p   -- the target density as a function handle from R^d to R.
+% 4. f   -- the forward model as a function handle from R^d to R.
+% 5. N   -- the number of samples at each iteration.
+% 6. rho -- the quantile to use ~ 0.9 or 0.99.
+% 7. dt  -- the minimum threshold increase at each iteration.
 %--------------------------------------------------------------------------
 % Output:
-% 1. p   -- an estimate of the rare-event probability.
-% 2. mu  -- the mean of the optimal Guassian biasing density.
-% 3. S   -- the covariance matrix of the optimal Gaussian biasing density.
+% 1. prob -- an estimate of the rare-event probability.
+% 2. mu   -- the mean of the optimal Guassian biasing density d-by-1.
+% 3. S    -- the covariance matrix of the optimal Gaussian biasing density.
+%            has size d-by-d.
 %--------------------------------------------------------------------------
 
-% The number of samples are rare-events.
-Ne = ceil((1 - rho) * N);
 
-Z = Xi;
+d  = size(Z, 2); % The dimension of the random variables.
 
-d = size(Xi, 2); % The dimension of the random variables.
+% Initialize relevant variables.
+k  = 1;             % Iteration counter.
+tk = t - 1;         % Initialize the threshold to be less than t at first.
+mu = zeros(d, 1);   % Initialize the mean.
+S  = eye(d);        % Initialize the covariance matrix.
+P  = zeros(N, 1);   % The target density evaluations.
+Q  = ones(N, 1);    % The biasing density evaluations.
 
-Z = Xi;
-
-k = 0;
-while true
-    if k == 0
-        Fx = F(Xi); % Column vector.
-        Gk = sort(Fx);
-        gamma = Gk(Ne);
-        tk = min([gamma, t]);
-        % Fit a Gaussian to the samples.
-        indicator = (Fx > tk);
-        mu = sum(Xi.*indicator)/sum(indicator);
-        S = zeros(d); % d-by-d matrix
-        for i=1:N
-            if indicator(i)
-                S = S + (Xi(i,:)' - mu) * (Xi(i,:)' - mu)';
-            end
-        end
-        S = S / sum(indicator); % Covariance matrix.
-        
-    else
+% The main iteration.
+while tk < t
+    
+    % Draw samples based on previous iteration.
+    if k ~= 1
         Z = mvnrnd(mu, S, N);  % Draw new samples from normal dist.
-        Fx = F(Xi);
-        Gk = sort(Fx);
-        gamma = Gk(Ne);
-        tk = min([gamma, t]);
-        indicator = (Fx > tk);
-        W = p(Z)./mvnpdf(Z, mu, S); % Weights of the samples.
-        mu = sum(W'*indicator.*Xi)/sum(W'*indicator);
-        S = zeros(d, d);
-        for i=1:N
-            if indicator(i)
-                S = S + (Z(i,:) - mu) * (Z(i,:) - mu)';
-            end
-        end
-        S = S / sum(indicator); % Covariance matrix.
+    end
+    
+    % Compute model outputs.  Stored as a column vector N-by-1.
+    F = zeros(N, 1);
+    for i = 1:N
+        F(i) = f(Z(i,:));
+    end
+    
+    % Estimate the rho quantile.
+    Gk    = sort(F);            % Sort model outputs.
+    gamma = Gk(ceil(rho * N));  % Estimate the rho quantile.
+    
+    % Update the threshold.
+    if k == 1
+        tk = max([gamma, t]);
+    else  
+        tk = max([t, min([tk - dt, gamma])]);
     end
 
-    if tk >= t
-        break;
+    I = (F >= tk); % The indicator function for each sample.
+    
+    % Now compute the weights.
+    if k == 1
+        W = ones(N, 1);
+    else
+        % Compute the target and biasing densities at the samples.
+        for i = 1:N
+            P(i) = p(Z(i,:));
+            Q(i) = mvnpdf(Z(i,:)', mu, S);
+        end
+        W = P ./ Q;
     end
+    
+    % Estimate the mean.
+    mu = zeros(d, 1);
+    for i = 1:N
+        mu = mu + (I(i) * W(i) * Z(i,:)');
+    end
+    mu = mu / (I' * W); % Re-normalize.
+    
+    % Estimate the covariance matrix.
+    S = zeros(d);
+    for i = 1:N
+        S = S + I(i) * W(i) * ((Z(i,:)' - mu) * (Z(i,:)' - mu)');
+    end
+    S = S / (I' * W); % Re-normalize.
+    
+    % Update iteration counter.
     k = k + 1;
 end
 
-prob = mean(W.*indicator);
+% Now compute the Cross Entropy estimate for the probability.
+
+prob = (I' * W) / N;
 
 end
 
