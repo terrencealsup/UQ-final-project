@@ -12,8 +12,19 @@ dt = 0.01;
 
 [prob, mu, S] = CrossEntropy(Z, t, p, f, N, rho, dt, {});
 
+
+
 prob
 
 prob_true = 1 - normcdf(t)
 
 relerr = abs(prob_true - prob)/prob_true
+
+
+figure(1);
+x = linspace(-3, 3, 500);
+pdf = normpdf(x, 0, 1);
+plot(x, pdf, 'b-');
+hold on
+bias = normpdf(x, mu, S);
+plot(x, bias, 'r-')
