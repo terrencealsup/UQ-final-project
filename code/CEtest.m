@@ -14,11 +14,13 @@ dt = 0.01;
 
 
 
-prob
+fprintf("\nCE Estimate      = %f\n",prob);
 
-prob_true = 1 - normcdf(t)
+prob_true = 1 - normcdf(t);
+fprintf("True Probability = %f\n", prob_true);
 
-relerr = abs(prob_true - prob)/prob_true
+relerr = abs(prob_true - prob)/prob_true;
+fprintf("Relative Error   = %f\n\n", relerr);
 
 
 figure(1);
@@ -27,4 +29,8 @@ pdf = normpdf(x, 0, 1);
 plot(x, pdf, 'b-');
 hold on
 bias = normpdf(x, mu, sqrt(S));
-plot(x, bias, 'r-')
+plot(x, bias, 'r-');
+legend(["Target", "Biasing"], 'interpreter', 'latex', 'Location', 'NorthWest');
+xlabel('$x$', 'interpreter', 'latex');
+ylabel('Density', 'interpreter', 'latex');
+title('CE Biasing Density', 'interpreter', 'latex');
