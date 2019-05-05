@@ -54,20 +54,16 @@ while tk < t
     end
     
     % Compute model outputs.  Stored as a column vector N-by-1.
-    F = zeros(N, 1);
-    for i = 1:N
-        F(i) = f(Z(i,:));
-    end
+    F = f(Z);
     
     % Estimate the rho quantile.
-    Gk    = sort(F);            % Sort model outputs.
-    gamma = Gk(ceil(rho * N));  % Estimate the rho quantile.
+    gamma = quantile(F, rho);
     
     % Update the threshold.
     if k == 1
         tk = min([gamma, t]);
     else  
-        tk = min([t, max([tk - dt, gamma])]);
+        tk = min([t, max([tk + dt, gamma])]);
     end
 
     I = (F >= tk); % The indicator function for each sample.
@@ -87,21 +83,26 @@ while tk < t
     % Estimate the mean.
     mu = zeros(d, 1);
     for i = 1:N
-        mu = mu + (I(i) * W(i) * Z(i,:)');
+        if I(i) ~= 0
+            mu = mu + (I(i) * W(i) * Z(i,:)');
+        end
     end
     mu = mu / (I' * W); % Re-normalize.
     
     % Estimate the covariance matrix.
     S = zeros(d);
     for i = 1:N
-        S = S + I(i) * W(i) * ((Z(i,:)' - mu) * (Z(i,:)' - mu)');
+        if I(i) ~= 0
+            S = S + I(i) * W(i) * ((Z(i,:)' - mu) * (Z(i,:)' - mu)');
+        end
     end
     S = S / (I' * W); % Re-normalize.
     
     % Inflate the covariance matrix so it is better conditioned.
-    [V, D] = eig(S);
-    D = max(D, 1e-3 * eye(d)); % Minimum eigenvalue is at least 10^-3.
-    S = V * D * V';
+    %[V, D] = eig(S);
+    %D = max(D, 1e-5 * eye(d)); % Minimum eigenvalue is at least 10^-3.
+    %S = V * D * V';
+    S = S + 1e-3 * eye(d);
     
     % Update iteration counter.
     k = k + 1;
