@@ -22,9 +22,9 @@ relerr = abs(prob_true - prob)/prob_true
 
 
 figure(1);
-x = linspace(-3, 3, 500);
+x = linspace(-4, 4, 500);
 pdf = normpdf(x, 0, 1);
 plot(x, pdf, 'b-');
 hold on
-bias = normpdf(x, mu, S);
+bias = normpdf(x, mu, sqrt(S));
 plot(x, bias, 'r-')

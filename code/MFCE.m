@@ -1,4 +1,4 @@
-function [prob, mu, S] = MFCE(Z, t, p, f, lvl, N, rho, dt, Smin)
+function [prob, mu, S] = MFCE(Z, t, p, f, lvl, N, rho, dt)
 % MFCE
 %
 % Use the MFCE method to estimate the rare-event probability P_p[f(Z) > t].  
@@ -15,7 +15,6 @@ function [prob, mu, S] = MFCE(Z, t, p, f, lvl, N, rho, dt, Smin)
 % 6. N    -- the number of samples at each iteration.
 % 7. rho  -- the quantile to use ~ 0.9 or 0.99.
 % 8. dt   -- the minimum threshold increase at each iteration.
-% 9. Smin -- minimum absolute value allowed for the covariance matrix.
 %--------------------------------------------------------------------------
 % Output:
 % 1. prob -- an estimate of the rare-event probability.
@@ -30,7 +29,6 @@ d = size(Z, 2); % Get the dimension.
 for l = 1:length(lvl)
     mlvl = {}; % Store the parameters from the previous level here.
     if l ~= 1              
-        %S = S + Smin*eye(d);
         Z = mvnrnd(mu, S, N);
         mlvl{1} = mu;
         mlvl{2} = S;

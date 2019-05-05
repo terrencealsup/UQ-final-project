@@ -65,9 +65,9 @@ while tk < t
     
     % Update the threshold.
     if k == 1
-        tk = max([gamma, t]);
+        tk = min([gamma, t]);
     else  
-        tk = max([t, min([tk - dt, gamma])]);
+        tk = min([t, max([tk - dt, gamma])]);
     end
 
     I = (F >= tk); % The indicator function for each sample.
@@ -97,6 +97,11 @@ while tk < t
         S = S + I(i) * W(i) * ((Z(i,:)' - mu) * (Z(i,:)' - mu)');
     end
     S = S / (I' * W); % Re-normalize.
+    
+    % Inflate the covariance matrix so it is better conditioned.
+    [V, D] = eig(S);
+    D = max(D, 1e-3 * eye(d)); % Minimum eigenvalue is at least 10^-3.
+    S = V * D * V';
     
     % Update iteration counter.
     k = k + 1;
