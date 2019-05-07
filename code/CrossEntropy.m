@@ -83,7 +83,7 @@ while tk < t
     % Estimate the mean.
     mu = zeros(d, 1);
     for i = 1:N
-        if I(i) ~= 0
+        if I(i) ~= 0 && W(i) ~= 0
             mu = mu + (I(i) * W(i) * Z(i,:)');
         end
     end
@@ -92,17 +92,17 @@ while tk < t
     % Estimate the covariance matrix.
     S = zeros(d);
     for i = 1:N
-        if I(i) ~= 0
+        if I(i) ~= 0 && W(i) ~= 0
             S = S + I(i) * W(i) * ((Z(i,:)' - mu) * (Z(i,:)' - mu)');
         end
     end
     S = S / (I' * W); % Re-normalize.
     
     % Inflate the covariance matrix so it is better conditioned.
-    %[V, D] = eig(S);
-    %D = max(D, 1e-5 * eye(d)); % Minimum eigenvalue is at least 10^-3.
-    %S = V * D * V';
-    S = S + 1e-3 * eye(d);
+    [V, D] = eig(S);
+    D = max(D, 1e-3 * eye(d)); % Minimum eigenvalue is at least 10^-3.
+    S = V * D * V';
+    %S = S + 1e-3 * eye(d);
     
     % Update iteration counter.
     k = k + 1;

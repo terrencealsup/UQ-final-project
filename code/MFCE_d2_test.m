@@ -1,12 +1,12 @@
 addpath('../ellip/');
 
 
-N = 1e5;
-t = 0.45;
+N = 1e4;
+t = 0.35;
 
-%Z = rand(N, 16);
+Z = rand(N, 16);
 d = 16;
-Z = mvnrnd(zeros(d,1), 1e-2*eye(d), N);
+%Z = mvnrnd(zeros(d,1), 1e-2*eye(d), N);
 
 
 lvl = 3:5;
@@ -17,9 +17,9 @@ dt = 0.01;
 [prob, mu, S] = MFCE(Z, t, @p, @f, lvl, N, rho, dt);
 
 
-true_prob = 1e-4;
+true_prob = 5.4e-3;
 
-relerr = abs(true_prob - prob)/true_prob;
+relerr = abs(true_prob - prob)/true_prob
 
 function vals = f(x, l)
     ops = load(['operatorsBlocks16_level',num2str(l),'.mat']);

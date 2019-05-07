@@ -28,8 +28,6 @@ d = size(Z, 2); % Get the dimension.
 % Loop over all levels.
 for l = 1:length(lvl)
     mlvl = {}; % Store the parameters from the previous level here.
-    mlvl{1} = zeros(d,1);
-    mlvl{2} = 1e-2 * eye(d);
     if l ~= 1              
         Z = mvnrnd(mu, S, N);
         mlvl{1} = mu;
