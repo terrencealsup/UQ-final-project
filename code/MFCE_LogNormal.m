@@ -1,8 +1,8 @@
-function [prob, mu, S, F] = MFCE(Z, t, p, f, lvl, N, rho, dt)
+function [prob, mu, S] = MFCE_LogNormal(Z, t, p, f, lvl, N, rho, dt)
 % MFCE
 %
 % Use the MFCE method to estimate the rare-event probability P_p[f(Z) > t].  
-% Finds the optimal Gaussian biasing density.
+% Finds the optimal Log-Normal biasing density.
 %
 % Authors: Terrence Alsup and Frederick Law
 %--------------------------------------------------------------------------
@@ -10,7 +10,7 @@ function [prob, mu, S, F] = MFCE(Z, t, p, f, lvl, N, rho, dt)
 % 1. Z    -- N-by-d matrix of samples from p.  d is the dimension.
 % 2. t    -- the rare-event threshold.
 % 3. p    -- the target density as a function handle from R^d to R.
-% 4. f    -- the forward model as a function handle from ((R^d)^N, lvl) to R.
+% 4. f    -- the forward model as a function handle ((R^d)^N, lvl) to R.
 % 5. lvl  -- the ordered list of levels we evaluate at.
 % 6. N    -- the number of samples at each iteration.
 % 7. rho  -- the quantile to use ~ 0.9 or 0.99.
@@ -18,10 +18,9 @@ function [prob, mu, S, F] = MFCE(Z, t, p, f, lvl, N, rho, dt)
 %--------------------------------------------------------------------------
 % Output:
 % 1. prob -- an estimate of the rare-event probability.
-% 2. mu   -- the mean of the optimal Guassian biasing density d-by-1.
-% 3. S    -- the covariance matrix of the optimal Gaussian biasing density.
+% 2. mu   -- mean of the optimal Log-Normal biasing density d-by-1.
+% 3. S    -- covariance matrix of the optimal Log-Normal biasing density.
 %            has size d-by-d.
-% 4. F    -- the model evaluations.
 %--------------------------------------------------------------------------
 
 d = size(Z, 2); % Get the dimension.
@@ -30,17 +29,12 @@ d = size(Z, 2); % Get the dimension.
 for l = 1:length(lvl)
     mlvl = {}; % Store the parameters from the previous level here.
     if l ~= 1              
-        Z = mvnrnd(mu, S, N);
+        Z = exp(mvnrnd(mu, S, N)); % Generate log-normal samples.
         mlvl{1} = mu;
         mlvl{2} = S;
     end
     fl = @(x) f(x, lvl(l)); % Model at level l.
-    
-    if l == length(lvl)
-        [prob, mu, S, F] = CrossEntropy(Z, t, p, fl, N, rho, dt, mlvl);
-    else
-        [prob, mu, S, ~] = CrossEntropy(Z, t, p, fl, N, rho, dt, mlvl);
-    end
+    [prob, mu, S] = CE_LogNormal(Z, t, p, fl, N, rho, dt, mlvl);
 end
 
 end
