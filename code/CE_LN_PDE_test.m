@@ -15,10 +15,10 @@ addpath('../ellip/');
 %         -- t = 0.265 --> Pt = 1.75e-04
 
 d = 4; %dimension
-N = 5e3; %number of samples
-t = 0.34; %threshold (see above)
+N = 1e3; %number of samples
+t = 0.3; %threshold (see above)
 %change truth based on above
-truth = 1.83e-04;
+truth = 3.30e-03;
 
 %parameters on the target lognormal
 m = 1.6*ones(1,d); s = 0.25;

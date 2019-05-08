@@ -29,7 +29,7 @@ end
 
 %density of the target log normal
 if d == 1
-    p = @(x) normpdf(log(x), m, s) / prod(x); 
+    p = @(x) normpdf(log(x), m, s) ./ prod(x,2); 
 else
     p = @(x) mvnpdf(log(x), m, s) ./ prod(x,2);
 end

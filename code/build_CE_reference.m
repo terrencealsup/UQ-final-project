@@ -3,8 +3,8 @@ close all; clearvars;
 addpath('../ellip/');
 
 d = 16; %dimension
-N = 1e4; %number of samples
-t = 0.28; %threshold (see above)
+N = 1e5; %number of samples
+t = 0.3; %threshold (see above)
 tname = num2str(t); tname(1:2) = []; %can't have the 0. in file name
 
 disp(['Building d=',num2str(d),' high-fidelity CE with N=', num2str(N),...
