@@ -9,7 +9,7 @@ Z = exp(m + s*randn(N,1));
 
 p = @(x) normpdf(log(x), m, s)./x;
 
-t = 3000;
+t = 2;
 rho = 0.9;
 dt = 0.01;
 
