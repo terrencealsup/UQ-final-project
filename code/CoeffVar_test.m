@@ -4,9 +4,9 @@ addpath('../sim data/');
 %test coeff of variation
 
 
-d = 16; %dimension
+d = 1; %dimension
 N = 5e1; %number of samples
-t = 0.315; %threshold (see above)
+t = 0.90; %threshold (see above)
 tname = num2str(t); tname(1:2) = [];
 %change truth based on above
 num_times = 30;
@@ -16,13 +16,14 @@ load(['CEdim',num2str(d),'threshold0point',tname,'.mat']);
 % disp(['Squared coefficient of variation estimate is ', num2str(c)]);
 % disp(['runtime is ',num2str(avg_time)]);
 
-% % d = 1
-% MFCE_N_vec = [5e1,5e2,5e3,5e4];
-% CE_N_vec = [1e2,1e3,1e4,1e5];
+disp(d)
+% d = 1
+MFCE_N_vec = [5e1,5e2,5e3,5e4];
+CE_N_vec = [1e2,1e3,1e4,1e5];
 
-% d = 16
-MFCE_N_vec = [5e3,1e4,5e4,1e5];
-CE_N_vec = [5e3,1e4,5e4,1e5];
+% % d = 16
+% MFCE_N_vec = [5e3,1e4,5e4,1e5];
+% CE_N_vec = [5e3,1e4,5e4,1e5];
 
 
 MFCE_sqcovs = zeros(1,length(MFCE_N_vec)); MFCE_avgtimes = zeros(1,length(MFCE_N_vec));

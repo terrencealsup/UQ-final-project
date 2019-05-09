@@ -97,8 +97,9 @@ while tk < t
 %     end
 %     mu = mu / (I' * W); % Re-normalize.
 
-    %vectorized
-    temp1 = I.*W; sum1 = sum(temp1);
+    % Vectorized.
+    temp1 = I .* W; 
+    sum1 = sum(temp1);
     mu = (log(Z)' * temp1) / sum1;
     
     % Estimate the covariance matrix.
@@ -112,7 +113,7 @@ while tk < t
         end
     end
 %     S = S / (I' * W); % Re-normalize.
-    S = S/sum1;
+    S = S / sum1;
     
     % Inflate the covariance matrix so it is better conditioned.
 %     [V, D] = eig(S);
